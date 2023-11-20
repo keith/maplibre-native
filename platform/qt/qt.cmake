@@ -138,23 +138,19 @@ target_link_libraries(
         Qt${QT_VERSION_MAJOR}::Network
 )
 
-# Interface library for object linking
-add_library(mbgl-core-interface INTERFACE)
-target_link_libraries(
-    mbgl-core-interface
-    INTERFACE
-        $<BUILD_INTERFACE:mbgl-vendor-parsedate> $<TARGET_OBJECTS:mbgl-vendor-parsedate>
-        $<BUILD_INTERFACE:mbgl-vendor-nunicode> $<TARGET_OBJECTS:mbgl-vendor-nunicode>
-        $<BUILD_INTERFACE:mbgl-vendor-csscolorparser> $<TARGET_OBJECTS:mbgl-vendor-csscolorparser>
-        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:$<BUILD_INTERFACE:mbgl-vendor-sqlite>>
-        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:$<TARGET_OBJECTS:mbgl-vendor-sqlite>>
+# Object library list
+set(MLN_QT_VENDOR_LIBRARIES
+    mbgl-vendor-parsedate
+    mbgl-vendor-nunicode
+    mbgl-vendor-csscolorparser
+    $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:$<BUILD_INTERFACE:mbgl-vendor-sqlite>>
+    PARENT_SCOPE
 )
-export(TARGETS mbgl-core-interface FILE MapboxCoreTargets.cmake APPEND)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     if (MLN_QT_WITH_INTERNAL_ICU)
         target_link_libraries(mbgl-core PUBLIC $<BUILD_INTERFACE:mbgl-vendor-icu>)
-        target_link_libraries(mbgl-core-interface INTERFACE $<BUILD_INTERFACE:mbgl-vendor-icu> $<TARGET_OBJECTS:mbgl-vendor-icu>)
+        list(APPEND MLN_QT_VENDOR_LIBRARIES mbgl-vendor-icu)
     else()
         target_link_libraries(mbgl-core PUBLIC ICU::uc)
     endif()
